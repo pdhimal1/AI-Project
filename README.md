@@ -16,4 +16,5 @@ Artificial intelligence class project ideas
 How to get there?
 - use established algorithms (machine learning APIs)
 - Online Machine learning: https://en.wikipedia.org/wiki/Online_machine_learning 
+- Weka - machine learning algorithms for data mining tasks: http://www.cs.waikato.ac.nz/ml/weka/ 
 
