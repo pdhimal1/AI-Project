@@ -3,7 +3,7 @@
 For academic purpose
 Artificial intelligence class project ideas
 - Smart robot
-- ###[Stock Predictor](Stock Predictor)
+- [Stock Predictor](Stock Predictor)
 - 
 - Health app to help people meet their fitness goal (divided into diet and exercise)
 - web crawler that searches for specific things (like google search)
