@@ -8,6 +8,8 @@ Artificial intelligence class project ideas
 - web crawler that searches for specific things (like google search)
 -   to get latest stock market prices (Yahoo Finance)
 - movie recommendation
+ 
+
 How to get there?
 - use established algorithms (machine learning APIs)
 - Online Machine learning: https://en.wikipedia.org/wiki/Online_machine_learning 
