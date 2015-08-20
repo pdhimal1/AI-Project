@@ -1,0 +1,6 @@
+Stock predictor using machine learning:
+  use bloomberg terminal, or yahoo finance to get realtime data
+
+Machine learning techniques:  
+  1. Support Vector Machine
+  2. Reinforcement Learning
