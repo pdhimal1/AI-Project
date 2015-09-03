@@ -1,6 +1,15 @@
-# Stock Predictor using machine learning
+### Stock Predictor using machine learning
 
-For academic purpose
 
-[Stock Predictor](Stock Predictor)
+
+Machine learning techniques:  
+  1. Support Vector Machine
+  2. Reinforcement Learning
+
+-  use - price, moving average, volume, historical prices,etc as data sets.
+
+Weka??
+
+Stock Predictor
+
 
