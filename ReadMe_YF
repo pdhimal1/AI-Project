@@ -1,0 +1,19 @@
+How to get yahoo_finance up and running
+
+Clone yahoo_finance repo using the following url
+
+yahoo-finance:
+	https://github.com/lukaszbanasiak/yahoo-finance
+
+	Usage: git clone url
+
+cd into yahoo_finance directory
+
+	cd yahoo_finance
+
+run setup.py
+
+	python setup.py install
+	*Don't forget to provide the arguement (install)
+
+See Yahoo Finance Notebook for turorial on how to use yahoo_finance to get prices
