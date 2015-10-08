@@ -6,18 +6,22 @@ Python Program to make stock price predictions
 Dependency:
   
   yahoo_finance
-    pip install yahoo-finance
+  
+      pip install yahoo-finance
     
   sklearn
-    sudo apt-get install build-essential python-dev python-setuptools \
+  
+      sudo apt-get install build-essential python-dev python-setuptools \
                      python-numpy python-scipy \
                      libatlas-dev libatlas3gf-base
                      
   docopt
-    pip install docopt==0.6.1
+  
+      pip install docopt==0.6.1
     
   datetime
-    pip install datetime
+      
+      pip install datetime
   
 
 Machine learning techniques:  
@@ -26,4 +30,5 @@ Machine learning techniques:
 
 Contributors:
   Prakash Dhimal  @pdhimal1
+  
   Kevin Sanford
