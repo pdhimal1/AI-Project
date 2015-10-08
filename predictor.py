@@ -1,123 +1,43 @@
 '''
 Usage: 
-	predictor.py <ticker> <start_date> <end_date>
+	predictor.py <ticker> <num_days>
 
 Arguments:
-	
+	<ticker> - ticker symbol for the company
+		 DJIA  if you want predictions for all 30 companies in DJIA
+	<num_days> - number of days to grab historical data
 '''
 
 from datetime import datetime
+from datetime import date as dt
+from datetime import timedelta
+
 from docopt import docopt
-from yahoo_finance import Share
 import numpy as np
-import matplotlib.pyplot as plt
-from datetime import datetime
-import company_name as cn
 from sklearn import svm
+from yahoo_finance import Share
 
-#to get all opening prices together
-def get_historical_opening(historical):
+import company_name as cn
+import get_historical as gh
+import trading_day as td
+import djia
 
-    opening = [] #is a dynamic array (list) for python
-    
-    for i in range(len(historical)):
-        x = historical[i]['Open']
-        opening.append(x)
-        
-    return opening
+def get_dates(num_days):
+	
+	today = dt.today()
+	yesturday = today - timedelta(days =1)
 
-def get_historical_high(historical):
+	date2 = today- timedelta(days = num_days)
+	yest = yesturday.isoformat()
+	date2 = date2.isoformat()	
+	
+	return date2, yest
 
-    days_high = []
-
-    for i in range(len(historical)):
-        x = historical[i]['High']
-        days_high.append(x)
-
-    return days_high
-
-def get_historical_low(historical):
-    days_low = [] 
-
-    for i in range(len(historical)):
-        x = historical[i]['Low']
-        days_low.append(x)
-
-    return days_low
-
-def get_historical_closing(historical):
-
-    #same for closing    
-    closing = [] 
-    
-    for i in range(len(historical)):
-        x = historical[i]['Close']
-        closing.append(x)
-        
-    return closing
-def get_historical_volume(historical, company):
-    historical_volume = [] #is a dynamic array (list) for python
-    average_volume = []
-
-    for i in range(len(historical)):
-        x = historical[i]['Volume']
-        historical_volume.append(x)
-        average_volume.append(company.get_avg_daily_volume())
-    return historical_volume, average_volume
-
-
-def main(args):
-	ticker = args['<ticker>']
-	start = args['<start_date>']
-	end = args['<end_date>']
-
-	date1 = datetime.strptime(start, "%m-%d-%Y").strftime("%Y-%m-%d")
-	date2 = datetime.strptime(end, "%m-%d-%Y").strftime("%Y-%m-%d")
-
-	company = Share(ticker)
-
-	historical = company.get_historical(date1, date2)
-	#print len(historical), "Days of historical data"
-
-	#reverse the list 
-	historical.reverse()
-
-	historical_opening = get_historical_opening(historical)
-	historical_closing = get_historical_closing(historical)
-	historical_high = get_historical_high(historical)
-	historical_low = get_historical_low(historical)
-	historical_volume, average_volume = get_historical_volume(historical, company)
-
-	opening =  np.array(historical_opening)
-	volume = np.array(historical_volume)
-	high = np.array(historical_high)
-	low = np.array(historical_low)
-	avg_vol = np.array(average_volume)
-
-	closing = np.array(historical_closing)
-
-	data = np.vstack((opening, high, low, volume, avg_vol))
-
-	shape1, shape2 = data.shape
-	data = data.reshape(shape2, shape1)
-
-	opening_price = company.get_open()
-	todays_volume = company.get_volume()
-	high = company.get_days_high()
-	low = company.get_days_low()
-	avg_volume = average_volume[0]
-
-	today =np.array((opening_price, high, low, todays_volume, avg_volume))
-
-	clf = svm.SVR()
-
-	#Fit takes in data (#_samples X #_of_features array), and target(closing - 1 X #_of_Sample_size array)
-	clf.fit(data,closing)
-
-	predict = clf.predict(today)
-
+def print_info(company, ticker, predict):
 
 	date = company.get_trade_datetime()
+	
+	#get company name
 	name = cn.find_name(ticker)
 
 	print "\n",  name, "[" , ticker, "]"  
@@ -130,6 +50,54 @@ def main(args):
 	print "current price                              $", company.get_price()
 	print
 	#print "% change today ", 
+
+def process_company(ticker, num_days):
+	#initialize share with the company ticker
+	company = Share(ticker)
+	
+	day1, day2 = get_dates(num_days)
+
+	
+
+	historical = company.get_historical(day1, day2)
+	#print len(historical), "Days of historical data"
+
+	#reverse the list 
+	historical.reverse()
+	
+	#get training and target data
+	training, target = gh.training_data(historical, company)
+
+	#get current trading day's data
+	this_day = td.get_trading_day(company)	
+
+	#--------------------------------------------------------------------#
+	clf = svm.SVR()
+
+	#Fit takes in data (#_samples X #_of_features array), and target(closing - 1 X #_of_Sample_size array)
+
+	clf.fit(training,target)
+	
+	#predict takes in today's 
+	predict = clf.predict(this_day)
+
+	print_info(company, ticker, predict)
+
+def main(args):
+
+	ticker = args['<ticker>']
+	num_days = args['<num_days>']
+	num_days = int(num_days)
+
+	DJIA = 'djia'
+	
+	if ticker.upper() == DJIA.upper():
+		tickers = djia.get_djia_list()
+		for i in range(len(tickers)):
+			process_company(tickers[i], num_days)
+	else:	
+		process_company(ticker, num_days)
+	
  
 
 if __name__ == '__main__':

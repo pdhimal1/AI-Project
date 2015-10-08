@@ -7,13 +7,17 @@ def find_name(ticker):
 	
 	company = ticker
 	company = company.upper()
+	index = -1
 
 	for i in range(len(df)):
 	    test = df["Ticker"][i]
 	    if test == company:
 		index = i;
 
-	return df["Name"][index]
+	if index is not -1:
+		return df["Name"][index]
+	else:
+		return "N/A"
 
 
 
