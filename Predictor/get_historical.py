@@ -1,5 +1,12 @@
+'''
+Python module to get historical prices and volumes for a given company
+'''
+
 import numpy as np
 
+'''
+
+'''
 #to get all opening prices together
 def get_historical_opening(historical):
 
@@ -10,6 +17,9 @@ def get_historical_opening(historical):
         opening.append(x)
         
     return opening
+'''
+
+'''
 
 def get_historical_high(historical):
 
@@ -51,6 +61,13 @@ def get_historical_volume(historical, company):
         average_volume.append(company.get_avg_daily_volume())
     return historical_volume, average_volume
 
+
+'''
+@param historical list, company - Share object
+@returns data - training data
+	closing - target data
+
+'''
 def training_data(historical, company):
 
 	historical_opening = get_historical_opening(historical)

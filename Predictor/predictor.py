@@ -2,6 +2,7 @@
 Usage: 
 	predictor.py <ticker> <num_days>
 
+
 Arguments:
 	<ticker> - ticker symbol for the company
 		 DJIA  if you want predictions for all 30 companies in DJIA

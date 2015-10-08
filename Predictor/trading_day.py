@@ -1,5 +1,12 @@
+'''
+Python module to get current trading prices for a given company
+'''
 import numpy as np
 
+'''
+@param - company 
+@return today - stacked array (opening price, high, low, today's volume and average volume)
+'''
 def get_trading_day(company):
 	
 	opening_price = company.get_open()
