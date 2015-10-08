@@ -2,7 +2,7 @@ import pandas as pd
 
 def find_name(ticker):
 	
-	df = pd.read_csv('secwiki_tickers.csv')
+	df = pd.read_csv('../Data/secwiki_tickers.csv')
 	
 	
 	company = ticker
