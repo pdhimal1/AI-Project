@@ -29,6 +29,7 @@ Machine learning techniques:
 
 
 Contributors:
+
   Prakash Dhimal  @pdhimal1
   
   Kevin Sanford
