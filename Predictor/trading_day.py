@@ -1,5 +1,10 @@
 '''
-Python module to get current trading prices for a given company
+File: 
+	trading_day.py
+Authors: 
+	Prakash Dhimal, Kevin Sanford
+Description:
+	Python module to get current trading prices for a given company
 '''
 import numpy as np
 

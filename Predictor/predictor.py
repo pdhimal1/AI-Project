@@ -7,8 +7,20 @@ Arguments:
 	<ticker> - ticker symbol for the company
 		 DJIA  if you want predictions for all 30 companies in DJIA
 	<num_days> - number of days to grab historical data
+Examples:
+	python predictor.py aapl 30
+	python predictor.py djia 10
+	python predictor.py DJIA 5
 '''
 
+'''
+File:
+	Predictor.py
+Authors:
+	 Prakash Dhimal, Kevin Sanford
+Description:
+	Python source file to make stock predictions using support vector machine. This program takes in <ticker> (ticker symbol for the company) and <num_days> (number of days to get historical data) from the command line. It uses yahoo_finance module to get stock data from yahoo finance, preprocess the data and send them to support vector machine as training data, target data, and prediction_day data to make the prediction. The program then outputs name of the company, ticker symbol, predicted closing price and current price of the stock	
+'''
 from datetime import datetime
 from datetime import date as dt
 from datetime import timedelta
@@ -23,6 +35,15 @@ import get_historical as gh
 import trading_day as td
 import djia
 
+'''
+Based on the number of dates provided, this method will return starting date (in yyyy-mm-dd format) and ending date (same format) to get the historical data
+Uses datetime module to get current data, day before, and starting day (day before - number of days)
+
+@param - num_days - number of days
+@returns
+	- date2 - starting day (in yyyy-mm-dd format)
+	- yest - days before (yesturday's date)
+'''
 def get_dates(num_days):
 	
 	today = dt.today()
@@ -34,6 +55,11 @@ def get_dates(num_days):
 	
 	return date2, yest
 
+'''
+Outputs name of the company, ticker symbol, predicted closing price and current price to standard output
+@param - company, ticker, predict
+@returns - none
+'''
 def print_info(company, ticker, predict):
 
 	date = company.get_trade_datetime()
@@ -52,6 +78,15 @@ def print_info(company, ticker, predict):
 	print
 	#print "% change today ", 
 
+'''
+Creates company Share object, gets historical prices, preprocess them and send them to support vector machine
+
+@param - ticker
+	num_days
+@returns
+	none
+
+'''
 def process_company(ticker, num_days):
 	#initialize share with the company ticker
 	company = Share(ticker)
@@ -84,6 +119,10 @@ def process_company(ticker, num_days):
 
 	print_info(company, ticker, predict)
 
+'''
+Main - driver of the program. Parses the command line arguments and calls precess company for given stock (based on ticker)
+	if 'djia' is entered calls process_company for all 30 companies in Dow Jones Industrial Average
+'''
 def main(args):
 
 	ticker = args['<ticker>']
@@ -98,7 +137,11 @@ def main(args):
 			process_company(tickers[i], num_days)
 	else:	
 		process_company(ticker, num_days)
-	
+
+'''
+Calls Main.
+Uses Docopt module to parse the command line arguments
+'''
  
 
 if __name__ == '__main__':

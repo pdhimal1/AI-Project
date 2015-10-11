@@ -1,11 +1,17 @@
 '''
-Python module to get historical prices and volumes for a given company
+File: 
+	get_historical.py
+Authors: 
+	Prakash Dhimal, Kevin Sanford
+Description:
+	Python module to get historical prices and volumes for a given company
 '''
 
 import numpy as np
 
 '''
-
+@param - historical - list containing historical prices, and volumes
+@retruns opening - list containing daily opening prices from the historical data
 '''
 #to get all opening prices together
 def get_historical_opening(historical):
@@ -17,10 +23,11 @@ def get_historical_opening(historical):
         opening.append(x)
         
     return opening
-'''
 
 '''
-
+@param - historical - list containing historical prices, and volumes
+@retruns days_high - list containing daily high prices from the historical data
+'''
 def get_historical_high(historical):
 
     days_high = []
@@ -31,6 +38,11 @@ def get_historical_high(historical):
 
     return days_high
 
+'''
+@param - historical - list containing historical prices, and volumes
+@retruns days_low - list containing daily low prices from the historical data
+'''
+
 def get_historical_low(historical):
     days_low = [] 
 
@@ -40,6 +52,11 @@ def get_historical_low(historical):
 
     return days_low
 
+
+'''
+@param - historical - list containing historical prices, and volumes
+@retruns closing - list containing daily closing prices from the historical data
+'''
 def get_historical_closing(historical):
 
     #same for closing    
@@ -51,6 +68,13 @@ def get_historical_closing(historical):
         
     return closing
 
+
+'''
+@param - historical - list containing historical prices, and volumes
+	- company - Share object
+@retruns - historical_volume - list containing daily volume from the historical data
+	- average_volume - list containing average volume for the sample data
+'''
 def get_historical_volume(historical, company):
     historical_volume = [] #is a dynamic array (list) for python
     average_volume = []
@@ -63,6 +87,10 @@ def get_historical_volume(historical, company):
 
 
 '''
+Method to stack training data together
+	stacks opening, volume, high,low,average_volume together 
+	result is traing data array of (sample size X # of features)
+	and target array of (sample size X 1)
 @param historical list, company - Share object
 @returns data - training data
 	closing - target data
