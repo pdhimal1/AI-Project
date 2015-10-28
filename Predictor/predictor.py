@@ -24,6 +24,8 @@ Description:
 from datetime import datetime
 from datetime import date as dt
 from datetime import timedelta
+import sys
+from socket import gethostbyname, gaierror
 
 from docopt import docopt
 import numpy as np
@@ -34,6 +36,7 @@ import company_name as cn
 import get_historical as gh
 import trading_day as td
 import djia
+import normalize as scale
 
 '''
 Based on the number of dates provided, this method will return starting date (in yyyy-mm-dd format) and ending date (same format) to get the historical data
@@ -68,7 +71,7 @@ def print_info(company, ticker, predict):
 	name = cn.find_name(ticker)
 
 	print "\n",  name, "[" , ticker, "]"  
-	print "Predicted [closing] price for", date[:10], ": $", predict[0]
+	print "Predicted [closing] price for", date[:10], ": $ %.2f " % predict[0]
 	company.refresh()
 
 	#change = (company.get_price() - company.get_open())/company.get_open()
@@ -89,7 +92,12 @@ Creates company Share object, gets historical prices, preprocess them and send t
 '''
 def process_company(ticker, num_days):
 	#initialize share with the company ticker
-	company = Share(ticker)
+	try:
+		company = Share(ticker)
+
+	except (gaierror):
+		print "\nNot connected!\n"
+		sys.exit()
 	
 	day1, day2 = get_dates(num_days)
 
@@ -100,15 +108,23 @@ def process_company(ticker, num_days):
 
 	#reverse the list 
 	historical.reverse()
+
+	#print len(historical)
 	
+	unscaled_opening = gh.get_unscaled_opening(historical)
+	
+	#--------------------------------#
+	scaler = scale.get_scaler(unscaled_opening)
+
 	#get training and target data
-	training, target = gh.training_data(historical, company)
+	training, target, scaled_training, scaled_target = gh.training_data(historical, company, scaler)
 
 	#get current trading day's data
-	this_day = td.get_trading_day(company)	
+	this_day, scaled_today = td.get_trading_day(company, scaler)	
+
 
 	#--------------------------------------------------------------------#
-	clf = svm.SVR()
+	clf = svm.SVR(gamma=0.0001, C=15)
 
 	#Fit takes in data (#_samples X #_of_features array), and target(closing - 1 X #_of_Sample_size array)
 
@@ -117,7 +133,16 @@ def process_company(ticker, num_days):
 	#predict takes in today's 
 	predict = clf.predict(this_day)
 
-	print_info(company, ticker, predict)
+	#print_info(company, ticker, predict)
+
+	clf.fit(scaled_training,scaled_target)
+	predict = clf.predict(this_day)
+	#print predict
+	pre = scaler.inverse_transform(predict)
+
+	
+	print "Using scaled data"
+	print_info(company, ticker, pre)
 
 '''
 Main - driver of the program. Parses the command line arguments and calls precess company for given stock (based on ticker)
