@@ -145,6 +145,21 @@ def process_company(ticker, num_days):
 	print_info(company, ticker, pre)
 
 '''
+
+'''
+def gui_call(ticker, days):
+	num_days = days
+
+	DJIA = 'djia'
+
+	if ticker.upper() == DJIA.upper():
+		tickers = djia.get_djia_list()
+		for i in range(len(tickers)):
+			process_company(tickers[i], num_days)
+	else:	
+		process_company(ticker, num_days)
+
+'''
 Main - driver of the program. Parses the command line arguments and calls precess company for given stock (based on ticker)
 	if 'djia' is entered calls process_company for all 30 companies in Dow Jones Industrial Average
 '''
