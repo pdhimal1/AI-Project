@@ -25,33 +25,23 @@ To run the program:
 
 Dependency:
 
-  Python 2.7
-  
-  yahoo_finance
-  
-  sklearn
-  
-  docopt
-  
-  Tkinter
-  
-  numpy
-  
-  pandas
-  
-  (See dependency.txt for more information)
-  
-  
+  	Python 2.7
+  	yahoo_finance
+  	sklearn
+  	docopt
+  	Tkinter
+  	numpy
+  	pandas
+  	(See dependency.txt for more information)
 
 Machine learning techniques:  
   1. Support Vector Machine
 
 Markets Covered:
 
-All the markets covered by yahoo finance will be covered by this program.
+	All the markets covered by yahoo finance will be covered by this program.
 
 Contributors:
-
-  Prakash Dhimal  @pdhimal1
-  
-  Kevin Sanford
+	
+	Prakash Dhimal  @pdhimal1
+	Kevin Sanford
