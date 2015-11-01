@@ -1,32 +1,54 @@
 ### Stock Predictor using machine learning
 
-Python Program to make stock price predictions
-  program written in python 2
+Stock Predictor is a stock price prediction program written in python. Stock prediction uses Yahoo finance to get required data and make predictions using support vector machine provided in SKlearn.
+
+![alt text](screenshots/prediction_10_31.png "sample run")
+
+To run the program:
+
+	Using GUI:
+	
+		cd into AI-Project/Predictor
+		
+                python predictor_gui.py
+                
+                  Use the window to make predictions
+                  
+	Using Shell
+	
+	        cd into AI-Project/Predictor
+	        
+			    python predictor.py <ticker> <number_of_days>
+			
+			    python predictor.py (-h || --help) (to see more)
+			
 
 Dependency:
+
+  Python 2.7
   
   yahoo_finance
   
-      pip install yahoo-finance
-    
   sklearn
   
-      sudo apt-get install build-essential python-dev python-setuptools \
-                     python-numpy python-scipy \
-                     libatlas-dev libatlas3gf-base
-                     
   docopt
   
-      pip install docopt==0.6.1
-    
-  datetime
-      
-      pip install datetime
+  Tkinter
+  
+  numpy
+  
+  pandas
+  
+  (See dependency.txt for more information)
+  
   
 
 Machine learning techniques:  
   1. Support Vector Machine
 
+Markets Covered:
+
+All the markets covered by yahoo finance will be covered by this program.
 
 Contributors:
 
