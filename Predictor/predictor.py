@@ -124,11 +124,11 @@ def process_company(ticker, num_days):
 
 
 	#--------------------------------------------------------------------#
-	clf = svm.SVR(gamma=0.0001, C=15)
+	clf = svm.SVR(gamma=0.001, C=0.01) # gamma = 0.00000001 for 10 days
 
 	#Fit takes in data (#_samples X #_of_features array), and target(closing - 1 X #_of_Sample_size array)
 
-	clf.fit(training,target)
+	clf.fit(scaled_training,scaled_target)
 	
 	#predict takes in today's 
 	predict = clf.predict(this_day)
@@ -136,12 +136,12 @@ def process_company(ticker, num_days):
 	#print_info(company, ticker, predict)
 
 	clf.fit(scaled_training,scaled_target)
-	predict = clf.predict(this_day)
+	predict = clf.predict(scaled_today)
 	#print predict
 	pre = scaler.inverse_transform(predict)
 
 	
-	print "Using scaled data"
+	#print "Using scaled data"
 	print_info(company, ticker, pre)
 
 '''

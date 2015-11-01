@@ -21,8 +21,9 @@ def get_trading_day(company, scaler):
 	high = float(company.get_days_high())
 	low = float(company.get_days_low())
 	avg_volume = float(company.get_avg_daily_volume())
+        change = float(company.get_change())
 
-	today = np.array((opening_price, high, low))
+	today = np.array((opening_price, high, low, change))
 
 	scaled_today = scale.scale(today, scaler)
 

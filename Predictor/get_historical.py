@@ -24,7 +24,10 @@ def get_unscaled_opening(historical):
         opening.append(x)        
     return opening
 
-
+'''
+@param - historical - list containing historical prices, and volumes
+@retruns opening, scaled_opening - list containing daily opening prices from the historical data
+'''
 def get_historical_opening(historical, scaler):
 
     opening = [] #is a dynamic array (list) for python
@@ -109,6 +112,27 @@ def get_historical_volume(historical, company, scaler):
 
     return historical_volume, average_volume, scaled_historical_volume, scaled_average_volume
 
+'''
+@param - historical - list containing historical prices, and volumes
+	- scaler
+@return change - price change for the day
+	_scaled_change - price change scaled for -1 to 1
+
+'''
+def get_change(historical, scaler):
+        change = []
+        change.append(0)
+        for i in range(len(historical)-1):
+            x = float(historical[i+1]["Close"]) - float(historical[i]['Close'])
+            change.append(x)
+        scaled_change = scale.scale(change, scaler)
+
+        return change, scaled_change
+
+'''
+def get_range():
+
+'''
 
 '''
 Method to stack training data together
@@ -127,6 +151,7 @@ def training_data(historical, company, scaler):
 	historical_high, scaled_high = get_historical_high(historical, scaler)
 	historical_low, scaled_low = get_historical_low(historical, scaler)
 	historical_volume, average_volume, scaled_volume, scaled_avg_vol = get_historical_volume(historical, company, scaler)
+        change, scaled_change = get_change(historical, scaler)
 
 	opening =  np.array(historical_opening)
 	_scaled_opening =  np.array(scaled_opening)
@@ -146,8 +171,11 @@ def training_data(historical, company, scaler):
 	closing = np.array(historical_closing)
 	_scaled_closing = np.array(scaled_closing)
 
-	data = np.vstack((opening, high, low))
-	scaled_data = np.vstack((_scaled_opening, _scaled_high, _scaled_low))
+        _change = np.array(change)
+        _scaled_change = np.array(scaled_change)
+
+	data = np.vstack((opening, high, low, _change))
+	scaled_data = np.vstack((_scaled_opening, _scaled_high, _scaled_low, _scaled_change))
 	
 
 	shape1, shape2 = data.shape

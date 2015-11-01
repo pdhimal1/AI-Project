@@ -154,7 +154,7 @@ def setGUI(root):
     #------------------------------------------------------------------------#
     #            code to make stdout appear in the GUI                       #
     text = tk.Text()
-    text.configure(background='black')
+    text.configure(background='dimgrey')
     text.tag_configure("stdout", foreground="white", font=("Arial", 11))
     text.pack(fill = 'both', expand = 'True')
     sys.stdout = TextRedirector(text, "stdout")
