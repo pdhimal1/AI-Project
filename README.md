@@ -2,7 +2,7 @@
 
 Stock Predictor is a stock price prediction program written in python. Stock prediction uses Yahoo finance to get required data and make predictions using support vector machine provided in SKlearn.
 
-![alt text](screenshots/prediction_10_31.png "sample run")
+![alt text](prediction_10_31.png "sample run")
 
 To run the program:
 
