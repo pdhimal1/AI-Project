@@ -1,0 +1,83 @@
+Dependencies:
+
+	Python 2.7
+	
+	Packages
+	----------------------------------------------------------------
+	yahoo_finance [1]	- depends on simplejson, pytz-2014.2
+		Documentation: https://pypi.python.org/pypi/yahoo-finance/1.2.1
+
+		Installation:
+			Linux & Windows (using pip):
+				pip install yahoo-finance (recommanded)
+	
+				* this method will install required packages for yahoo_finance
+		
+					OR
+	
+			[1] cd into yahoo_finance (included in the project folder)
+				python setup.py install
+			------------------------------------------------
+
+				Additional dependencies For yahoo_finance
+				-----------------------------------------------
+				simplejson 	[1.1]
+					cd into simplejson
+					python setup.py install
+				pytz-2012.2 	[1.2]
+					cd into pytz-2014.2
+					python setup.py install
+
+				-----------------------------------------------
+
+					
+	------------------------------------------------------------------
+	docopt 	 [2]
+		Documentation: https://github.com/docopt/docopt
+		
+		Installation:
+			Linux and Windows - Using pip or easy_install
+				pip install docopt==0.6.1
+				
+					OR
+
+				[2] cd into docopt (provided with the project)
+					python setup.py install
+	-------------------------------------------------------------------------
+
+	sklearn	[3]	- depends on numpy
+		Documentation: http://scikit-learn.org/stable/install.html
+		Installation:
+			Linux: sudo apt-get install python-sklearn
+			
+			
+			Windows: pip install -U scikit-learn
+
+	---------------------------------------------------------------------------
+	Tkinter
+		Documentation: http://www.tkdocs.com/tutorial/install.html#installwin
+		Installation:
+			Linux: apt-get install python-tk
+			Windows: see documentation				
+
+	-----------------------------------------------
+	Additional - dependencies 
+
+	numpy 
+		Linux: sudo apt-get install python-numpy
+		Windows: 
+	pandas	
+		Documentation: http://pandas.pydata.org/pandas-docs/stable/install.html
+
+		Installation:			
+			Linux: sudo apt-get install python-pandas
+					OR
+				pip install pandas
+			Windows: Using pip - pip install pandas
+
+	datetime	- included in standard python library
+
+	subprocess	- included in standard python library
+
+
+	sys		-- included in standard python library
