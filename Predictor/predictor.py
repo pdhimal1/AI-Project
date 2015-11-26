@@ -124,7 +124,7 @@ def process_company(ticker, num_days):
 
 
 	#--------------------------------------------------------------------#
-	clf = svm.SVR(gamma=0.001, C=0.01) # gamma = 0.00000001 for 10 days
+	clf = svm.SVR(gamma=0.001, C=0.01, kernel='linear') # gamma = 0.00000001 for 10 days
 
 	#Fit takes in data (#_samples X #_of_features array), and target(closing - 1 X #_of_Sample_size array)
 
