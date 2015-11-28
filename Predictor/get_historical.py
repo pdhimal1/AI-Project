@@ -10,6 +10,7 @@ Description:
 import numpy as np
 import normalize as scale
 
+
 '''
 @param - historical - list containing historical prices, and volumes
 @retruns opening - list containing daily opening prices from the historical data
@@ -144,7 +145,7 @@ Method to stack training data together
 	closing - target data
 
 '''
-def training_data(historical, company, scaler):
+def training_data(historical, company, scaler, useSpread, useVolume):
 
 	historical_opening, scaled_opening = get_historical_opening(historical, scaler)
 	historical_closing, scaled_closing = get_historical_closing(historical, scaler)
@@ -173,9 +174,19 @@ def training_data(historical, company, scaler):
 
         _change = np.array(change)
         _scaled_change = np.array(scaled_change)
-
-	data = np.vstack((opening, high, low, _change))
-	scaled_data = np.vstack((_scaled_opening, _scaled_high, _scaled_low, _scaled_change))
+	
+	if useSpread is False and useVolume is False:
+		data = np.vstack((opening, high, low))
+		scaled_data = np.vstack((_scaled_opening, _scaled_high, _scaled_low))
+	elif useSpread is True and useVolume is False:
+		data = np.vstack((opening, high, low, _change))
+		scaled_data = np.vstack((_scaled_opening, _scaled_high, _scaled_low, _scaled_change))
+	elif useSpread is False and useVolume is True:
+		data = np.vstack((opening, high, low, volume))
+		scaled_data = np.vstack((_scaled_opening, _scaled_high, _scaled_low, _scaled_volume))
+	else:
+		data = np.vstack((opening, high, low, _change, volume))
+		scaled_data = np.vstack((_scaled_opening, _scaled_high, _scaled_low, _scaled_change, _scaled_volume))
 	
 
 	shape1, shape2 = data.shape

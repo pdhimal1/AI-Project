@@ -7,6 +7,7 @@ Arguments:
 	<ticker> - ticker symbol for the company
 		 DJIA  if you want predictions for all 30 companies in DJIA
 	<num_days> - number of days to grab historical data
+
 Examples:
 	python predictor.py aapl 30
 	python predictor.py djia 10
@@ -21,9 +22,11 @@ Authors:
 Description:
 	Python source file to make stock predictions using support vector machine. This program takes in <ticker> (ticker symbol for the company) and <num_days> (number of days to get historical data) from the command line. It uses yahoo_finance module to get stock data from yahoo finance, preprocess the data and send them to support vector machine as training data, target data, and prediction_day data to make the prediction. The program then outputs name of the company, ticker symbol, predicted closing price and current price of the stock	
 '''
+
 from datetime import datetime
 from datetime import date as dt
 from datetime import timedelta
+
 import sys
 from socket import gethostbyname, gaierror
 
@@ -35,8 +38,8 @@ from yahoo_finance import Share
 import company_name as cn
 import get_historical as gh
 import trading_day as td
-import djia
 import normalize as scale
+
 
 '''
 Based on the number of dates provided, this method will return starting date (in yyyy-mm-dd format) and ending date (same format) to get the historical data
@@ -69,16 +72,21 @@ def print_info(company, ticker, predict):
 	
 	#get company name
 	name = cn.find_name(ticker)
-
-	print "\n",  name, "[" , ticker, "]"  
+	str1 = "\n" +  name + "[" + ticker + "]"
+	print "\n",  name, "[" , ticker, "]"
+	sys.stderr.write(str1)
+	str2 = "\nPredicted [closing] price for " + date[:10] + ": $ %.2f " % predict[0]
 	print "Predicted [closing] price for", date[:10], ": $ %.2f " % predict[0]
+	sys.stderr.write(str2)
 	company.refresh()
 
 	#change = (company.get_price() - company.get_open())/company.get_open()
 	#print change
 
-	print "current price                              $", company.get_price()
+	print "Current price                              $", company.get_price()
+	sys.stderr.write(("\nCurrent price                             $ " + company.get_price()))
 	print
+	sys.stderr.write("\n")
 	#print "% change today ", 
 
 '''
@@ -90,7 +98,7 @@ Creates company Share object, gets historical prices, preprocess them and send t
 	none
 
 '''
-def process_company(ticker, num_days):
+def process_company(ticker, num_days, useSpread, useVolume):
 	#initialize share with the company ticker
 	try:
 		company = Share(ticker)
@@ -115,16 +123,17 @@ def process_company(ticker, num_days):
 	
 	#--------------------------------#
 	scaler = scale.get_scaler(unscaled_opening)
-
+	
 	#get training and target data
-	training, target, scaled_training, scaled_target = gh.training_data(historical, company, scaler)
+	training, target, scaled_training, scaled_target = gh.training_data(historical, company, scaler, useSpread, useVolume)
+	
 
 	#get current trading day's data
-	this_day, scaled_today = td.get_trading_day(company, scaler)	
+	this_day, scaled_today = td.get_trading_day(company, scaler, useSpread, useVolume)	
 
 
 	#--------------------------------------------------------------------#
-	clf = svm.SVR(gamma=0.001, C=0.01, kernel='linear') # gamma = 0.00000001 for 10 days
+	clf = svm.SVR(gamma=0.000001, C=1e3, kernel='rbf') # gamma = 0.00000001 for 10 days
 
 	#Fit takes in data (#_samples X #_of_features array), and target(closing - 1 X #_of_Sample_size array)
 
@@ -147,17 +156,25 @@ def process_company(ticker, num_days):
 '''
 
 '''
-def gui_call(ticker, days):
+def gui_call(ticker, days, spreadV, volumeV):
 	num_days = days
+	
+	useSpread = False	
+	useVolume = False
+	useAverage = False
 
+	if (spreadV == 1):
+		useSpread = True
+	if (volumeV == 1):
+		useVolume = True
 	DJIA = 'djia'
 
 	if ticker.upper() == DJIA.upper():
 		tickers = djia.get_djia_list()
 		for i in range(len(tickers)):
-			process_company(tickers[i], num_days)
+			process_company(tickers[i], num_days, useSpread, useVolume)
 	else:	
-		process_company(ticker, num_days)
+		process_company(ticker, num_days, useSpread, useVolume)
 
 '''
 Main - driver of the program. Parses the command line arguments and calls precess company for given stock (based on ticker)
@@ -168,22 +185,20 @@ def main(args):
 	ticker = args['<ticker>']
 	num_days = args['<num_days>']
 	num_days = int(num_days)
-
+	
 	DJIA = 'djia'
 	
 	if ticker.upper() == DJIA.upper():
-		tickers = djia.get_djia_list()
+		tickers = cn.get_djia_list()
 		for i in range(len(tickers)):
-			process_company(tickers[i], num_days)
+			process_company(tickers[i], num_days, True, False)
 	else:	
-		process_company(ticker, num_days)
+		process_company(ticker, num_days, True, False)
 
 '''
 Calls Main.
 Uses Docopt module to parse the command line arguments
 '''
- 
-
 if __name__ == '__main__':
 	args = docopt(__doc__)
 	main(args)

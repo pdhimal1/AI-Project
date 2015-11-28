@@ -8,8 +8,8 @@ Description:
 '''
 import subprocess
 import predictor as pred
-import djia
 from Tkinter import *
+import tkMessageBox
 import Tkinter as tk
 import sys
 
@@ -24,14 +24,16 @@ class TextRedirector(object):
     def write(self, str):
         self.widget.configure(state="normal")
         self.widget.insert("end", str, (self.tag,))
-        self.widget.configure(state="disabled")
+        #self.widget.configure(state="disabled")
 
 
 # Global variables
 root            = tk.Tk()          # Creates the window pane for the GUI
 tickerResponse  = StringVar()   # Creates a variable for string responses from GUI
 daysResponse    = IntVar()      # Creates a variable for integer respones from GUI
-
+text = tk.Text()
+spreadV = IntVar()
+volumeV = IntVar()
 '''
 Prints out the header
 
@@ -45,13 +47,6 @@ def headerInfo():
     #print "*       Stock Predictor       *"
     #print "***************************************************"
 
-'''
-
-
-'''
-
-def printMessage(tex):
-    pass
 '''
 Executes the function to call predictor for either a specific stock or the DJIA list
 
@@ -70,7 +65,8 @@ Executes the function to call predictor for either a specific stock or the DJIA 
 def executeJob(ticker, days):
     subprocess.call('clear', shell = True)
     headerInfo()
-    pred.gui_call(ticker, days)
+    pred.gui_call(ticker, days, spreadV.get(), volumeV.get())
+
 '''
 Grabs just the days required to run the whole DJIA list
 
@@ -116,8 +112,34 @@ def grabSpecific():
 	    else:
 		headerInfo()
         	print "An error has occurred! Check inputs and try again!"
-	    
 
+
+def helpDisplay():
+    HELP_TEXT = """Enter a company's ticker symbol and amount of days to train and hit the Prediction button.
+
+Predictions for DJIA companies, enter amount of days to train, and hit DJIA button. """
+    tkMessageBox.showinfo("HELP", HELP_TEXT)
+    #mLabel3 = Label(text = "\nHELP:", font=("Arial", 11)).pack()
+    #mLabel4 = Label(text = "Enter company's ticker symbol and amount of days to train and hit Predict button", font=("Arial", 10)).pack()
+    #mLabel5 = Label(text = "Predictions for DJIA companies, enter amount of days to train, and hit DJIA button.", font=("Arial", 10)).pack()
+
+
+'''
+
+
+'''
+def set_up_buttons(master):
+	mLabelbutton = Label(master, text = "Pick features to use", font=("Arial", 11)).pack()
+
+	c = Checkbutton(master, text = " Price Change", variable=spreadV, anchor='w', font=("Arial", 11))
+	c.pack()
+	c.var = spreadV
+	
+	v = Checkbutton(master, text = " Volume       ", variable=volumeV, anchor='w', font=("Arial", 11))
+	v.pack()
+	v.var = volumeV
+
+	return spreadV, volumeV
 
 '''
 Sets up the GUI to display to user
@@ -142,47 +164,47 @@ def setGUI(root):
     # Modify dimensions of root window
     root.title("Stock Predictor")
     #root.geometry("400x400")
-    
+
 
     # Add Frames
     leftFrame = Frame(root, bd = 5)
     leftFrame.pack(side=LEFT)
 
-    rightFrame = Frame(root, bd = 10, relief = 'raised')
+    rightFrame = Frame(root, bd = 10)
     rightFrame.pack(side=RIGHT)
+
+    spreadV, volumeV = set_up_buttons(rightFrame)
 
     #------------------------------------------------------------------------#
     #            code to make stdout appear in the GUI                       #
-    text = tk.Text()
+    
     text.configure(background='dimgrey')
     text.tag_configure("stdout", foreground="white", font=("Arial", 11))
     text.pack(fill = 'both', expand = 'True')
     sys.stdout = TextRedirector(text, "stdout")
-    sys.stderr = TextRedirector(text, "stderr")
+    #sys.stderr = TextRedirector(text, "stderr")
     #------------------------------------------------------------------------#
 
-   
+
 
     # Add Information for User Input
     mLabel  = Label(leftFrame, text = "Stock Ticker", fg='blue', font=("Arial", 11), anchor = 'n').pack()
     mEntry  = Entry(leftFrame, width=15, textvariable = tickerResponse, font=("Arial", 11)).pack()
     mLabel2 = Label(leftFrame, text = "Number of Days", fg='blue', font=("Arial", 11), anchor='n').pack()
     mEntry2 = Entry(leftFrame, width=15, textvariable = daysResponse, font=("Arial", 11)).pack()
-   
+
 
     # Asks for DJIA or regular
     mbutton1 = Button(leftFrame, command = grabDJIA,     text = "  DJIA ", fg='red', anchor='s', font=("Arial", 11))
     mbutton2 = Button(leftFrame, command = grabSpecific, text = "Predict", fg='red', anchor='s', font=("Arial", 11))
+    mbutton4 = Button(leftFrame, command = helpDisplay, text = " HELP ", fg='red', anchor='s', font=("Arial",11))
     mbutton3 = Button(leftFrame, command = exitGUI,      text = "  EXIT ", fg='red', anchor='s', font=("Arial", 11))
     mbutton2.pack()
     mbutton1.pack()
+    mbutton4.pack()
     mbutton3.pack()
- 
-    mLabel3 = Label(text = "\nHELP:", font=("Arial", 11)).pack()
-    mLabel4 = Label(text = "Enter company's ticker symbol and amount of days to train and hit Predict button", font=("Arial", 10)).pack()
-    mLabel5 = Label(text = "Predictions for DJIA companies, enter amount of days to train, and hit DJIA button.", font=("Arial", 10)).pack()
 
-
+    
 
 '''
 Main function for the GUI. It sets up the GUI, clears screen, prints the header, activates the GUI loop
@@ -209,7 +231,6 @@ def main():
 '''
 Driver
 '''
+
 if __name__ == '__main__':
 	main()
-
-
