@@ -58,7 +58,7 @@ def get_djia_list():
 	data_in = tb.open_file("../Data/ticker_database.h5", mode='r')
 	array = data_in.root.djia_tickers.Djia_Tickers
 	for x in range(len(array)):
-   		ticker.append(array[i])
+   		ticker.append(array[x])
 
 	#data_in.close()
 	return ticker

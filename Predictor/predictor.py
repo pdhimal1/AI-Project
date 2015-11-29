@@ -170,7 +170,7 @@ def gui_call(ticker, days, spreadV, volumeV):
 	DJIA = 'djia'
 
 	if ticker.upper() == DJIA.upper():
-		tickers = djia.get_djia_list()
+		tickers = cn.get_djia_list()
 		for i in range(len(tickers)):
 			process_company(tickers[i], num_days, useSpread, useVolume)
 	else:	
