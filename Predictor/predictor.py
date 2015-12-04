@@ -112,46 +112,49 @@ def process_company(ticker, num_days, useSpread, useVolume):
 	
 
 	historical = company.get_historical(day1, day2)
+
+	if len(historical) is 0:
+		print "Error! Please check your inputs and try again"
 	#print len(historical), "Days of historical data"
+	else:
+		#reverse the list 
+		historical.reverse()
 
-	#reverse the list 
-	historical.reverse()
-
-	#print len(historical)
+		#print len(historical)
 	
-	unscaled_opening = gh.get_unscaled_opening(historical)
+		unscaled_opening = gh.get_unscaled_opening(historical)
 	
-	#--------------------------------#
-	scaler = scale.get_scaler(unscaled_opening)
+		#--------------------------------#
+		scaler = scale.get_scaler(unscaled_opening)
 	
-	#get training and target data
-	training, target, scaled_training, scaled_target = gh.training_data(historical, company, scaler, useSpread, useVolume)
+		#get training and target data
+		training, target, scaled_training, scaled_target = gh.training_data(historical, company, scaler, useSpread, useVolume)
 	
 
-	#get current trading day's data
-	this_day, scaled_today = td.get_trading_day(company, scaler, useSpread, useVolume)	
+		#get current trading day's data
+		this_day, scaled_today = td.get_trading_day(company, scaler, useSpread, useVolume)	
 
 
-	#--------------------------------------------------------------------#
-	clf = svm.SVR(gamma=0.000001, C=1e3, kernel='rbf') # gamma = 0.00000001 for 10 days
+		#--------------------------------------------------------------------#
+		clf = svm.SVR(gamma=0.000001, C=1e3, kernel='rbf') # gamma = 0.00000001 for 10 days
 
-	#Fit takes in data (#_samples X #_of_features array), and target(closing - 1 X #_of_Sample_size array)
+		#Fit takes in data (#_samples X #_of_features array), and target(closing - 1 X #_of_Sample_size array)
 
-	clf.fit(scaled_training,scaled_target)
+		clf.fit(scaled_training,scaled_target)
 	
-	#predict takes in today's 
-	predict = clf.predict(this_day)
+		#predict takes in today's 
+		predict = clf.predict(this_day)
 
-	#print_info(company, ticker, predict)
+		#print_info(company, ticker, predict)
 
-	clf.fit(scaled_training,scaled_target)
-	predict = clf.predict(scaled_today)
-	#print predict
-	pre = scaler.inverse_transform(predict)
+		clf.fit(scaled_training,scaled_target)
+		predict = clf.predict(scaled_today)
+		#print predict
+		pre = scaler.inverse_transform(predict)
 
 	
-	#print "Using scaled data"
-	print_info(company, ticker, pre)
+		#print "Using scaled data"
+		print_info(company, ticker, pre)
 
 '''
 
