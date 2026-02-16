@@ -350,7 +350,9 @@ class ScrollableStockGUI:
                 self.autocomplete_list.delete(0, tk.END)
                 for ticker, name in matches:
                     self.autocomplete_list.insert(tk.END, f'{ticker} - {name}')
-                self.autocomplete_list.pack(fill='x', pady=(0, 10), before=self.autocomplete_list.master.winfo_children()[3])
+                # Show autocomplete list after the ticker entry
+                if not self.autocomplete_list.winfo_viewable():
+                    self.autocomplete_list.pack(fill='x', pady=(0, 10))
             else:
                 self.autocomplete_list.pack_forget()
         else:
