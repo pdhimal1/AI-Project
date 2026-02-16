@@ -9,7 +9,7 @@ Description:
 
 
 import pandas as pd
-import tables as tb
+import os
 
 '''
 Opens Stock.csv from Data to find the company name
@@ -17,50 +17,76 @@ Opens Stock.csv from Data to find the company name
 @param-ticker
 @returns name of the company, N/A if not found
 '''
-'''
-def find_name(ticker):
-	
-	#read_csv will open and close the file	
-	df = pd.read_csv('../Data/Stock.csv')
-	
-	
-	company = ticker
-	company = company.upper()
-	index = -1
-
-	for i in range(len(df)):
-	    test = df["Ticker"][i].upper()
-	    if test == company:
-		index = i;
-
-	if index is not -1:
-		return df["Name"][index]
-	else:
-		return "N/A"
-'''
 
 def find_name(ticker):
-	data_in = tb.open_file("../Data/ticker_database.h5", mode='r')
-	table_in = data_in.root.group.table
-	index = -1
-	for x in table_in.iterrows():
-        	if x['ticker'] == ticker:
-            		name = x['name']
-			index = x.nrow
-	data_in.close()
-	if index is not -1:
-		return name
-	else:
-		return "N/A"
+	# Try to read from CSV first
+	csv_path = os.path.join(os.path.dirname(__file__), '..', 'Data', 'Stock.csv')
+	
+	if os.path.exists(csv_path):
+		try:
+			df = pd.read_csv(csv_path)
+			company = ticker.upper()
+			
+			for i in range(len(df)):
+				test = str(df["Ticker"][i]).upper()
+				if test == company:
+					return df["Name"][i]
+		except Exception:
+			pass
+	
+	# Fallback: try HDF5 file if it exists
+	h5_path = os.path.join(os.path.dirname(__file__), '..', 'Data', 'ticker_database.h5')
+	if os.path.exists(h5_path):
+		try:
+			import tables as tb
+			data_in = tb.open_file(h5_path, mode='r')
+			table_in = data_in.root.group.table
+			index = -1
+			name = "N/A"
+			for x in table_in.iterrows():
+				if x['ticker'] == ticker:
+					name = x['name']
+					index = x.nrow
+			data_in.close()
+			if index != -1:
+				return name
+		except Exception:
+			pass
+	
+	# Return ticker if no name found
+	return ticker
 
 def get_djia_list():
-	ticker = []
-	data_in = tb.open_file("../Data/ticker_database.h5", mode='r')
-	array = data_in.root.djia_tickers.Djia_Tickers
-	for x in range(len(array)):
-   		ticker.append(array[x])
-
-	#data_in.close()
-	return ticker
+	# Try to read from CSV first
+	csv_path = os.path.join(os.path.dirname(__file__), '..', 'Data', 'DJIA_ticker.csv')
 	
+	if os.path.exists(csv_path):
+		try:
+			df = pd.read_csv(csv_path)
+			if 'Ticker' in df.columns:
+				return df['Ticker'].tolist()
+			else:
+				# Try first column
+				return df.iloc[:, 0].tolist()
+		except Exception:
+			pass
+	
+	# Fallback: try HDF5 file if it exists
+	h5_path = os.path.join(os.path.dirname(__file__), '..', 'Data', 'ticker_database.h5')
+	if os.path.exists(h5_path):
+		try:
+			import tables as tb
+			data_in = tb.open_file(h5_path, mode='r')
+			array = data_in.root.djia_tickers.Djia_Tickers
+			ticker = []
+			for x in range(len(array)):
+				ticker.append(array[x])
+			return ticker
+		except Exception:
+			pass
+	
+	# Default DJIA list if file not found
+	return ['AAPL', 'MSFT', 'JPM', 'V', 'JNJ', 'WMT', 'PG', 'UNH', 'HD', 'INTC',
+			'KO', 'VZ', 'DIS', 'MRK', 'AXP', 'CSCO', 'NKE', 'CVX', 'WBA', 'MCD',
+			'XOM', 'BA', 'GS', 'CAT', 'IBM', 'TRV', 'MMM', 'DOW', 'RTX', 'AMGN']
 
