@@ -310,11 +310,15 @@ class ScrollableStockGUI:
         self.results_text.config(state='disabled')
         
         # Chart frame with toolbar
-        chart_container = tk.LabelFrame(card, text=' Price Chart (Zoom & Pan Enabled) ',
-                                       font=('Arial', 11, 'bold'),
-                                       bg=self.colors['card'],
-                                       fg=self.colors['text'],
-                                       padx=5, pady=5)
+        chart_outer = tk.LabelFrame(card, text=' Price Chart (Zoom & Pan Enabled) ',
+                                   font=('Arial', 11, 'bold'),
+                                   bg=self.colors['card'],
+                                   fg=self.colors['text'],
+                                   padx=5, pady=5)
+        chart_outer.pack(fill='both', expand=True)
+        
+        # Create inner frame for grid layout
+        chart_container = tk.Frame(chart_outer, bg=self.colors['card'])
         chart_container.pack(fill='both', expand=True)
         chart_container.rowconfigure(0, weight=1)
         chart_container.columnconfigure(0, weight=1)
@@ -326,14 +330,15 @@ class ScrollableStockGUI:
         self.ax = self.fig.add_subplot(111)
         self.ax.set_facecolor('#fafafa')
         
-        # Canvas with toolbar
+        # Canvas
         self.canvas = FigureCanvasTkAgg(self.fig, chart_container)
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
         
-        # Add toolbar for zoom/pan
-        toolbar = NavigationToolbar2Tk(self.canvas, chart_container)
-        toolbar.grid(row=1, column=0, sticky='ew', padx=5, pady=5)
-        toolbar.update()
+        # Add toolbar in its own frame (using pack internally)
+        toolbar_frame = tk.Frame(chart_outer, bg=self.colors['card'])
+        toolbar_frame.pack(fill='x', pady=(5, 0))
+        toolbar = NavigationToolbar2Tk(self.canvas, toolbar_frame)
+        toolbar.pack(fill='x')
         
         # Placeholder
         self.ax.text(0.5, 0.5, 'Chart will appear here after prediction\n\nUse toolbar above to zoom and pan',
