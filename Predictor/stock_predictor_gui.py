@@ -26,7 +26,6 @@ class ScrollableStockGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Stock Price Predictor")
-        self.root.geometry("1280x750")
         self.root.configure(bg='#f0f0f0')
         
         # Colors
@@ -41,7 +40,7 @@ class ScrollableStockGUI:
             'border': '#e0e0e0'
         }
         
-        self.root.minsize(1100, 700)
+        self.root.minsize(800, 800)
         
         # Make window resizable
         self.root.rowconfigure(0, weight=1)
@@ -194,12 +193,14 @@ class ScrollableStockGUI:
         tk.Label(card, text='Training Period:', font=('Arial', 10, 'bold'),
                 bg=self.colors['card'], fg=self.colors['text']).pack(anchor='w', pady=(5, 2))
         
-        self.days_var = tk.StringVar(value='90')
+        self.days_var = tk.StringVar(value='60')
         
         periods_frame = tk.Frame(card, bg=self.colors['card'])
         periods_frame.pack(fill='x')
         
         periods = [
+            ('30 days (Quick)', '30'),
+            ('60 days', '60'),
             ('90 days (Recommended)', '90'),
             ('180 days (More accurate)', '180'),
             ('360 days (Best accuracy)', '360')
@@ -548,10 +549,25 @@ def main():
     app = ScrollableStockGUI(root)
     
     root.update_idletasks()
-    width = root.winfo_width()
-    height = root.winfo_height()
-    x = (root.winfo_screenwidth() // 2) - (width // 2)
-    y = (root.winfo_screenheight() // 2) - (height // 2)
+    
+    # Get the required size based on all widgets
+    root.geometry('')
+    root.update_idletasks()
+    
+    # Get the requested width/height from all widgets
+    req_width = root.winfo_reqwidth()
+    req_height = root.winfo_reqheight()
+    
+    # Add more height to fit everything without scrolling
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    
+    width = min(req_width + 50, screen_width - 50)
+    height = min(req_height + 200, screen_height - 100)
+    
+    # Center the window
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
     root.geometry(f'{width}x{height}+{x}+{y}')
     
     root.mainloop()
