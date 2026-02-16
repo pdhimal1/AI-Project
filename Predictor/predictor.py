@@ -20,7 +20,7 @@ File:
 Authors:
 	 Prakash Dhimal, Kevin Sanford
 Description:
-	Python source file to make stock predictions using support vector machine. This program takes in <ticker> (ticker symbol for the company) and <num_days> (number of days to get historical data) from the command line. It uses yahoo_finance module to get stock data from yahoo finance, preprocess the data and send them to support vector machine as training data, target data, and prediction_day data to make the prediction. The program then outputs name of the company, ticker symbol, predicted closing price and current price of the stock	
+	Python source file to make stock predictions using support vector machine. This program takes in <ticker> (ticker symbol for the company) and <num_days> (number of days to get historical data) from the command line. It uses yfinance module to get stock data from yahoo finance, preprocess the data and send them to support vector machine as training data, target data, and prediction_day data to make the prediction. The program then outputs name of the company, ticker symbol, predicted closing price and current price of the stock	
 '''
 
 from datetime import datetime
@@ -33,11 +33,12 @@ from socket import gethostbyname, gaierror
 from docopt import docopt
 import numpy as np
 from sklearn import svm
-from yahoo_finance import Share
+import yfinance as yf
 
 import company_name as cn
 import get_historical as gh
-import trading_day as td
+import current_trading_day as td
+import trading_day as trading_cal
 import normalize as scale
 
 
@@ -57,40 +58,38 @@ def get_dates(num_days):
 
 	date2 = today- timedelta(days = num_days)
 	yest = yesturday.isoformat()
-	date2 = date2.isoformat()	
-	
-	return date2, yest
+	date2 = date2.isoformat()
+	# Format for yfinance
+	return date2[:10], yest[:10]
 
 '''
 Outputs name of the company, ticker symbol, predicted closing price and current price to standard output
 @param - company, ticker, predict
 @returns - none
 '''
-def print_info(company, ticker, predict):
-
-	date = company.get_trade_datetime()
+def print_info(company_info, ticker, predict):
+	# Get next trading day for prediction date
+	next_trading = trading_cal.get_next_trading_day()
+	date_str = trading_cal.format_trading_day_with_weekday(next_trading)
 	
 	#get company name
 	name = cn.find_name(ticker)
 	str1 = "\n" +  name + "[" + ticker + "]"
-	print "\n",  name, "[" , ticker, "]"
+	print("\n", name, "[", ticker, "]")
 	sys.stderr.write(str1)
-	str2 = "\nPredicted [closing] price for " + date[:10] + ": $ %.2f " % predict[0]
-	print "Predicted [closing] price for", date[:10], ": $ %.2f " % predict[0]
+	str2 = "\nPredicted [closing] price for " + date_str + ": $ %.2f " % predict[0]
+	print("Predicted [closing] price for", date_str, ": $ %.2f " % predict[0])
 	sys.stderr.write(str2)
-	company.refresh()
 
-	#change = (company.get_price() - company.get_open())/company.get_open()
-	#print change
-
-	print "Current price                              $", company.get_price()
-	sys.stderr.write(("\nCurrent price                             $ " + company.get_price()))
-	print
+	#get current price from info
+	current_price = company_info.get('currentPrice') or company_info.get('regularMarketPrice', 'N/A')
+	print("Current price                              $", current_price)
+	sys.stderr.write(("\nCurrent price                             $ " + str(current_price)))
+	print()
 	sys.stderr.write("\n")
-	#print "% change today ", 
 
 '''
-Creates company Share object, gets historical prices, preprocess them and send them to support vector machine
+Creates company ticker object, gets historical prices, preprocess them and send them to support vector machine
 
 @param - ticker
 	num_days
@@ -99,65 +98,73 @@ Creates company Share object, gets historical prices, preprocess them and send t
 
 '''
 def process_company(ticker, num_days, useSpread, useVolume):
-	#initialize share with the company ticker
+	#initialize ticker with yfinance
 	try:
-		company = Share(ticker)
+		company = yf.Ticker(ticker)
+		# Test if we can get info
+		company_info = company.info
+		if not company_info:
+			print("\nError: Could not fetch data for ticker:", ticker)
+			return
 
-	except (gaierror):
-		print "\nNot connected!\n"
+	except Exception as e:
+		print("\nError connecting or fetching data:", str(e))
 		sys.exit()
 	
 	day1, day2 = get_dates(num_days)
 
+	# Get historical data using yfinance
+	historical = company.history(start=day1, end=day2)
 	
+	# Convert to list of dictionaries format expected by other functions
+	historical_list = []
+	for index, row in historical.iterrows():
+		historical_list.append({
+			'Open': row['Open'],
+			'High': row['High'],
+			'Low': row['Low'],
+			'Close': row['Close'],
+			'Adj_Close': row['Close'],  # yfinance already provides adjusted close
+			'Volume': row['Volume']
+		})
 
-	historical = company.get_historical(day1, day2)
-
-	if len(historical) is 0:
-		print "Error! Please check your inputs and try again"
-	#print len(historical), "Days of historical data"
+	if len(historical_list) == 0:
+		print("Error! Please check your inputs and try again")
+		return
+	
 	else:
 		#reverse the list 
-		historical.reverse()
+		historical_list.reverse()
 
-		#print len(historical)
-	
-		unscaled_opening = gh.get_unscaled_opening(historical)
+		unscaled_opening = gh.get_unscaled_opening(historical_list)
 	
 		#--------------------------------#
 		scaler = scale.get_scaler(unscaled_opening)
 	
 		#get training and target data
-		training, target, scaled_training, scaled_target = gh.training_data(historical, company, scaler, useSpread, useVolume)
+		training, target, scaled_training, scaled_target = gh.training_data(historical_list, company_info, scaler, useSpread, useVolume)
 	
 
 		#get current trading day's data
-		this_day, scaled_today = td.get_trading_day(company, scaler, useSpread, useVolume)	
-
+		this_day, scaled_today = td.get_trading_day(company_info, scaler, useSpread, useVolume)	
+		
+		# Reshape to 2D array (1 sample x n features) for sklearn
+		scaled_today = scaled_today.reshape(1, -1)
 
 		#--------------------------------------------------------------------#
 		clf = svm.SVR(gamma=0.000001, C=1e3, kernel='rbf') # gamma = 0.00000001 for 10 days
 
 		#Fit takes in data (#_samples X #_of_features array), and target(closing - 1 X #_of_Sample_size array)
 
-		clf.fit(scaled_training,scaled_target)
+		clf.fit(scaled_training, scaled_target)
 	
-		#predict takes in today's 
-		predict = clf.predict(this_day)
-
-		#print_info(company, ticker, predict)
-
-		clf.fit(scaled_training,scaled_target)
+		#predict takes in today's data
 		predict = clf.predict(scaled_today)
-		#print predict
-		pre = scaler.inverse_transform(predict)
+		pre = scaler.inverse_transform(predict.reshape(-1, 1)).flatten()
 
-	
-		#print "Using scaled data"
-		print_info(company, ticker, pre)
+		print_info(company_info, ticker, pre)
 
 '''
-
 '''
 def gui_call(ticker, days, spreadV, volumeV):
 	num_days = days
@@ -205,5 +212,3 @@ Uses Docopt module to parse the command line arguments
 if __name__ == '__main__':
 	args = docopt(__doc__)
 	main(args)
-
-

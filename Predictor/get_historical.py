@@ -18,12 +18,12 @@ import normalize as scale
 #to get all opening prices together
 def get_unscaled_opening(historical):
 
-    opening = [] #is a dynamic array (list) for python
-    
-    for i in range(len(historical)):
-        x = float(historical[i]['Open'])
-        opening.append(x)        
-    return opening
+	opening = [] #is a dynamic array (list) for python
+	
+	for i in range(len(historical)):
+		x = float(historical[i]['Open'])
+		opening.append(x)		
+	return opening
 
 '''
 @param - historical - list containing historical prices, and volumes
@@ -31,15 +31,15 @@ def get_unscaled_opening(historical):
 '''
 def get_historical_opening(historical, scaler):
 
-    opening = [] #is a dynamic array (list) for python
-    
-    for i in range(len(historical)):
-        x = float(historical[i]['Open'])
-        opening.append(x)
+	opening = [] #is a dynamic array (list) for python
+	
+	for i in range(len(historical)):
+		x = float(historical[i]['Open'])
+		opening.append(x)
 
-    scaled_opening = scale.scale(opening, scaler)
-        
-    return opening, scaled_opening
+	scaled_opening = scale.scale(np.array(opening), scaler)
+		
+	return opening, scaled_opening
 
 '''
 @param - historical - list containing historical prices, and volumes
@@ -47,15 +47,15 @@ def get_historical_opening(historical, scaler):
 '''
 def get_historical_high(historical, scaler):
 
-    days_high = []
+	days_high = []
 
-    for i in range(len(historical)):
-        x = float(historical[i]['High'])
-        days_high.append(x)
+	for i in range(len(historical)):
+		x = float(historical[i]['High'])
+		days_high.append(x)
 
-    scaled_high = scale.scale(days_high, scaler)
-        
-    return days_high, scaled_high
+	scaled_high = scale.scale(np.array(days_high), scaler)
+		
+	return days_high, scaled_high
 
 '''
 @param - historical - list containing historical prices, and volumes
@@ -63,15 +63,15 @@ def get_historical_high(historical, scaler):
 '''
 
 def get_historical_low(historical, scaler):
-    days_low = [] 
+	days_low = [] 
 
-    for i in range(len(historical)):
-        x = float(historical[i]['Low'])
-        days_low.append(x)
+	for i in range(len(historical)):
+		x = float(historical[i]['Low'])
+		days_low.append(x)
 
-    scaled_low = scale.scale(days_low, scaler)
-        
-    return days_low, scaled_low
+	scaled_low = scale.scale(np.array(days_low), scaler)
+		
+	return days_low, scaled_low
 
 
 '''
@@ -80,38 +80,40 @@ def get_historical_low(historical, scaler):
 '''
 def get_historical_closing(historical, scaler):
 
-    #same for closing    
-    closing = [] 
-    
-    for i in range(len(historical)):
-        x = float(historical[i]['Adj_Close'])
-        closing.append(x)
-        
-    scaled_closing = scale.scale(closing, scaler)
+	#same for closing	
+	closing = [] 
+	
+	for i in range(len(historical)):
+		x = float(historical[i]['Adj_Close'])
+		closing.append(x)
+		
+	scaled_closing = scale.scale(np.array(closing), scaler)
 
-    return closing, scaled_closing
+	return closing, scaled_closing
 
 
 '''
 @param - historical - list containing historical prices, and volumes
-	- company - Share object
+	- company_info - dict with company info from yfinance
 @retruns - historical_volume - list containing daily volume from the historical data
 	- average_volume - list containing average volume for the sample data
 '''
-def get_historical_volume(historical, company, scaler):
-    historical_volume = [] #is a dynamic array (list) for python
-    average_volume = []
+def get_historical_volume(historical, company_info, scaler):
+	historical_volume = [] #is a dynamic array (list) for python
+	average_volume = []
 
-    for i in range(len(historical)):
-        x = float(historical[i]['Volume'])
-        historical_volume.append(x)
-        average_volume.append(float(company.get_avg_daily_volume()))
+	avg_vol = company_info.get('averageVolume', 0)
 
-    scaled_historical_volume = scale.scale(historical_volume, scaler)
+	for i in range(len(historical)):
+		x = float(historical[i]['Volume'])
+		historical_volume.append(x)
+		average_volume.append(float(avg_vol))
 
-    scaled_average_volume = scale.scale(average_volume, scaler)
+	scaled_historical_volume = scale.scale(np.array(historical_volume), scaler)
 
-    return historical_volume, average_volume, scaled_historical_volume, scaled_average_volume
+	scaled_average_volume = scale.scale(np.array(average_volume), scaler)
+
+	return historical_volume, average_volume, scaled_historical_volume, scaled_average_volume
 
 '''
 @param - historical - list containing historical prices, and volumes
@@ -121,14 +123,14 @@ def get_historical_volume(historical, company, scaler):
 
 '''
 def get_change(historical, scaler):
-        change = []
-        change.append(0)
-        for i in range(len(historical)-1):
-            x = float(historical[i+1]["Close"]) - float(historical[i]['Close'])
-            change.append(x)
-        scaled_change = scale.scale(change, scaler)
+	change = []
+	change.append(0)
+	for i in range(len(historical)-1):
+		x = float(historical[i+1]["Close"]) - float(historical[i]['Close'])
+		change.append(x)
+	scaled_change = scale.scale(np.array(change), scaler)
 
-        return change, scaled_change
+	return change, scaled_change
 
 '''
 def get_range():
@@ -140,19 +142,19 @@ Method to stack training data together
 	stacks opening, volume, high,low,average_volume together 
 	result is traing data array of (sample size X # of features)
 	and target array of (sample size X 1)
-@param historical list, company - Share object
+@param historical list, company_info - dict from yfinance
 @returns data - training data
 	closing - target data
 
 '''
-def training_data(historical, company, scaler, useSpread, useVolume):
+def training_data(historical, company_info, scaler, useSpread, useVolume):
 
 	historical_opening, scaled_opening = get_historical_opening(historical, scaler)
 	historical_closing, scaled_closing = get_historical_closing(historical, scaler)
 	historical_high, scaled_high = get_historical_high(historical, scaler)
 	historical_low, scaled_low = get_historical_low(historical, scaler)
-	historical_volume, average_volume, scaled_volume, scaled_avg_vol = get_historical_volume(historical, company, scaler)
-        change, scaled_change = get_change(historical, scaler)
+	historical_volume, average_volume, scaled_volume, scaled_avg_vol = get_historical_volume(historical, company_info, scaler)
+	change, scaled_change = get_change(historical, scaler)
 
 	opening =  np.array(historical_opening)
 	_scaled_opening =  np.array(scaled_opening)
@@ -172,8 +174,8 @@ def training_data(historical, company, scaler, useSpread, useVolume):
 	closing = np.array(historical_closing)
 	_scaled_closing = np.array(scaled_closing)
 
-        _change = np.array(change)
-        _scaled_change = np.array(scaled_change)
+	_change = np.array(change)
+	_scaled_change = np.array(scaled_change)
 	
 	if useSpread is False and useVolume is False:
 		data = np.vstack((opening, high, low))
