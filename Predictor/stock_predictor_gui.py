@@ -26,7 +26,7 @@ class ScrollableStockGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Stock Price Predictor")
-        self.root.geometry("1400x900")
+        self.root.geometry("1280x750")
         self.root.configure(bg='#f0f0f0')
         
         # Colors
@@ -41,7 +41,7 @@ class ScrollableStockGUI:
             'border': '#e0e0e0'
         }
         
-        self.root.minsize(1200, 800)
+        self.root.minsize(1100, 700)
         
         # Make window resizable
         self.root.rowconfigure(0, weight=1)
@@ -85,21 +85,21 @@ class ScrollableStockGUI:
         self.create_content()
         
     def create_header(self):
-        """Create header"""
-        header = tk.Frame(self.main_frame, bg=self.colors['primary'], height=100)
-        header.pack(fill='x', pady=(0, 20))
+        """Create compact header"""
+        header = tk.Frame(self.main_frame, bg=self.colors['primary'], height=70)
+        header.pack(fill='x', pady=(0, 10))
         header.pack_propagate(False)
         
         title = tk.Label(header, text='📈 Stock Price Predictor', 
-                        font=('Arial', 28, 'bold'),
+                        font=('Arial', 24, 'bold'),
                         bg=self.colors['primary'], fg='white')
-        title.pack(pady=25)
+        title.pack(pady=15)
         
     def create_content(self):
-        """Create main content area"""
+        """Create main content area - compact layout"""
         # Content container
         content = tk.Frame(self.main_frame, bg=self.colors['bg'])
-        content.pack(fill='both', expand=True, padx=30, pady=10)
+        content.pack(fill='both', expand=True, padx=15, pady=5)
         
         # Configure grid
         content.columnconfigure(0, weight=1)
@@ -108,7 +108,7 @@ class ScrollableStockGUI:
         
         # Left panel - Controls
         left_panel = tk.Frame(content, bg=self.colors['bg'])
-        left_panel.grid(row=0, column=0, sticky='nsew', padx=(0, 15))
+        left_panel.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
         
         self.create_instructions_panel(left_panel)
         self.create_input_panel(left_panel)
@@ -116,81 +116,88 @@ class ScrollableStockGUI:
         
         # Right panel - Results
         right_panel = tk.Frame(content, bg=self.colors['bg'])
-        right_panel.grid(row=0, column=1, sticky='nsew', padx=(15, 0))
+        right_panel.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
         right_panel.rowconfigure(0, weight=1)
         right_panel.columnconfigure(0, weight=1)
         
         self.create_results_panel(right_panel)
         
     def create_instructions_panel(self, parent):
-        """Create instructions panel"""
+        """Create compact instructions panel"""
         card = tk.LabelFrame(parent, text=' 📋 How to Use ',
-                           font=('Arial', 12, 'bold'),
+                           font=('Arial', 11, 'bold'),
                            bg=self.colors['card'],
                            fg=self.colors['primary'],
-                           padx=15, pady=15)
-        card.pack(fill='x', pady=(0, 15))
+                           padx=10, pady=8)
+        card.pack(fill='x', pady=(0, 10))
         
-        steps = [
-            '1. Enter a stock ticker (e.g., AAPL)',
-            '2. Select training period (90/180/360 days)',
-            '3. Choose features to include',
-            '4. Click "Predict Price" button',
-            '5. View results and chart →'
-        ]
+        # Compact steps in 2 columns
+        steps_frame = tk.Frame(card, bg=self.colors['card'])
+        steps_frame.pack(fill='x')
         
-        for step in steps:
-            tk.Label(card, text=step, font=('Arial', 10),
+        steps_left = ['1. Enter ticker (e.g., AAPL)', '2. Select period (90/180/360 days)', '3. Choose features']
+        steps_right = ['4. Click "Predict Price"', '5. View results →']
+        
+        left_col = tk.Frame(steps_frame, bg=self.colors['card'])
+        left_col.pack(side='left', fill='x', expand=True)
+        
+        for step in steps_left:
+            tk.Label(left_col, text=step, font=('Arial', 9),
                     bg=self.colors['card'], fg=self.colors['text'],
-                    anchor='w').pack(fill='x', pady=2)
+                    anchor='w').pack(fill='x', pady=1)
         
-        # Tips
-        tips = tk.Frame(card, bg='#fff3cd', padx=10, pady=8)
-        tips.pack(fill='x', pady=(10, 0))
+        right_col = tk.Frame(steps_frame, bg=self.colors['card'])
+        right_col.pack(side='left', fill='x', expand=True)
         
-        tk.Label(tips, text='💡 Tips:', font=('Arial', 10, 'bold'),
-                bg='#fff3cd', fg='#856404').pack(anchor='w')
+        for step in steps_right:
+            tk.Label(right_col, text=step, font=('Arial', 9),
+                    bg=self.colors['card'], fg=self.colors['text'],
+                    anchor='w').pack(fill='x', pady=1)
+        
+        # Compact tips
+        tips = tk.Frame(card, bg='#fff3cd', padx=8, pady=5)
+        tips.pack(fill='x', pady=(8, 0))
+        
         tk.Label(tips, 
-                text='• Type to see stock suggestions\n• Longer periods = more accurate\n• Enable Technical Indicators for best results',
-                font=('Arial', 9), bg='#fff3cd', fg='#856404',
-                justify='left').pack(anchor='w', pady=(3, 0))
+                text='💡 Tips: Type for suggestions • Longer periods = more accurate • Enable Technical Indicators',
+                font=('Arial', 8), bg='#fff3cd', fg='#856404',
+                anchor='w').pack(fill='x')
         
     def create_input_panel(self, parent):
-        """Create input panel"""
+        """Create compact input panel"""
         card = tk.LabelFrame(parent, text=' Stock Information ',
-                           font=('Arial', 12, 'bold'),
+                           font=('Arial', 11, 'bold'),
                            bg=self.colors['card'],
                            fg=self.colors['text'],
-                           padx=15, pady=15)
-        card.pack(fill='x', pady=(0, 15))
+                           padx=10, pady=8)
+        card.pack(fill='x', pady=(0, 10))
         
         # Ticker input
-        tk.Label(card, text='Stock Ticker:', font=('Arial', 11, 'bold'),
+        tk.Label(card, text='Stock Ticker:', font=('Arial', 10, 'bold'),
                 bg=self.colors['card'], fg=self.colors['text']).pack(anchor='w')
-        
-        tk.Label(card, text='Type to search (e.g., AAPL, MSFT, TSLA)',
-                font=('Arial', 9), bg=self.colors['card'], 
-                fg=self.colors['text_light']).pack(anchor='w', pady=(2, 5))
         
         self.ticker_var = tk.StringVar()
         self.ticker_entry = ttk.Entry(card, textvariable=self.ticker_var,
-                                     font=('Arial', 12))
-        self.ticker_entry.pack(fill='x', pady=(0, 10))
+                                     font=('Arial', 11))
+        self.ticker_entry.pack(fill='x', pady=(2, 5))
         self.ticker_entry.bind('<KeyRelease>', self.on_ticker_type)
         
         # Autocomplete dropdown
-        self.autocomplete_list = tk.Listbox(card, font=('Arial', 10),
-                                           height=5, relief='solid',
+        self.autocomplete_list = tk.Listbox(card, font=('Arial', 9),
+                                           height=4, relief='solid',
                                            borderwidth=1)
-        self.autocomplete_list.pack(fill='x', pady=(0, 10))
+        self.autocomplete_list.pack(fill='x', pady=(0, 5))
         self.autocomplete_list.pack_forget()
         self.autocomplete_list.bind('<<ListboxSelect>>', self.on_select_stock)
         
         # Training period
-        tk.Label(card, text='Training Period:', font=('Arial', 11, 'bold'),
-                bg=self.colors['card'], fg=self.colors['text']).pack(anchor='w', pady=(10, 5))
+        tk.Label(card, text='Training Period:', font=('Arial', 10, 'bold'),
+                bg=self.colors['card'], fg=self.colors['text']).pack(anchor='w', pady=(5, 2))
         
         self.days_var = tk.StringVar(value='90')
+        
+        periods_frame = tk.Frame(card, bg=self.colors['card'])
+        periods_frame.pack(fill='x')
         
         periods = [
             ('90 days (Recommended)', '90'),
@@ -199,53 +206,50 @@ class ScrollableStockGUI:
         ]
         
         for text, value in periods:
-            rb = tk.Radiobutton(card, text=text, variable=self.days_var,
-                              value=value, font=('Arial', 10),
+            rb = tk.Radiobutton(periods_frame, text=text, variable=self.days_var,
+                              value=value, font=('Arial', 9),
                               bg=self.colors['card'], fg=self.colors['text'],
                               selectcolor=self.colors['card'])
-            rb.pack(anchor='w', pady=1)
+            rb.pack(anchor='w', pady=0)
         
         # Features
         features_frame = tk.LabelFrame(card, text=' Features ',
-                                      font=('Arial', 11, 'bold'),
+                                      font=('Arial', 10, 'bold'),
                                       bg=self.colors['card'],
                                       fg=self.colors['text'],
-                                      padx=10, pady=10)
-        features_frame.pack(fill='x', pady=(15, 0))
+                                      padx=8, pady=5)
+        features_frame.pack(fill='x', pady=(8, 0))
         
         self.use_spread = tk.BooleanVar(value=True)
         self.use_volume = tk.BooleanVar(value=False)
         self.use_tech = tk.BooleanVar(value=True)
         
         tk.Checkbutton(features_frame, text='Price Change',
-                      variable=self.use_spread, font=('Arial', 10),
-                      bg=self.colors['card']).pack(anchor='w', pady=1)
+                      variable=self.use_spread, font=('Arial', 9),
+                      bg=self.colors['card']).pack(anchor='w', pady=0)
         
         tk.Checkbutton(features_frame, text='Trading Volume',
-                      variable=self.use_volume, font=('Arial', 10),
-                      bg=self.colors['card']).pack(anchor='w', pady=1)
+                      variable=self.use_volume, font=('Arial', 9),
+                      bg=self.colors['card']).pack(anchor='w', pady=0)
         
         tk.Checkbutton(features_frame, text='Technical Indicators (RSI, MACD, SMA, EMA)',
-                      variable=self.use_tech, font=('Arial', 10),
-                      bg=self.colors['card']).pack(anchor='w', pady=1)
+                      variable=self.use_tech, font=('Arial', 9),
+                      bg=self.colors['card']).pack(anchor='w', pady=0)
         
         # Popular stocks buttons
         popular_frame = tk.Frame(card, bg=self.colors['card'])
-        popular_frame.pack(fill='x', pady=(15, 0))
+        popular_frame.pack(fill='x', pady=(8, 0))
         
-        tk.Label(popular_frame, text='Quick Select:', font=('Arial', 10, 'bold'),
-                bg=self.colors['card']).pack(anchor='w', pady=(0, 5))
-        
-        btn_frame = tk.Frame(popular_frame, bg=self.colors['card'])
-        btn_frame.pack(fill='x')
+        tk.Label(popular_frame, text='Quick:', font=('Arial', 9, 'bold'),
+                bg=self.colors['card']).pack(side='left')
         
         popular = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA']
         for ticker in popular:
-            btn = tk.Button(btn_frame, text=ticker, font=('Arial', 9),
+            btn = tk.Button(popular_frame, text=ticker, font=('Arial', 8),
                           bg=self.colors['border'], relief='flat',
-                          padx=8, pady=3,
+                          padx=5, pady=1,
                           command=lambda t=ticker: self.set_ticker(t))
-            btn.pack(side='left', padx=2, pady=2)
+            btn.pack(side='left', padx=1, pady=1)
             
     def create_buttons_panel(self, parent):
         """Create buttons panel - ALWAYS VISIBLE"""
