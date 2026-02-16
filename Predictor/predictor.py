@@ -97,7 +97,7 @@ Creates company ticker object, gets historical prices, preprocess them and send 
 	none
 
 '''
-def process_company(ticker, num_days, useSpread, useVolume):
+def process_company(ticker, num_days, useSpread, useVolume, useTechIndicators=True):
 	#initialize ticker with yfinance
 	try:
 		company = yf.Ticker(ticker)
@@ -142,11 +142,11 @@ def process_company(ticker, num_days, useSpread, useVolume):
 		scaler = scale.get_scaler(unscaled_opening)
 	
 		#get training and target data
-		training, target, scaled_training, scaled_target = gh.training_data(historical_list, company_info, scaler, useSpread, useVolume)
+		training, target, scaled_training, scaled_target = gh.training_data(historical_list, company_info, scaler, useSpread, useVolume, useTechIndicators)
 	
 
 		#get current trading day's data
-		this_day, scaled_today = td.get_trading_day(company_info, scaler, useSpread, useVolume)	
+		this_day, scaled_today = td.get_trading_day(company_info, scaler, useSpread, useVolume, useTechIndicators)	
 		
 		# Reshape to 2D array (1 sample x n features) for sklearn
 		scaled_today = scaled_today.reshape(1, -1)
@@ -166,25 +166,27 @@ def process_company(ticker, num_days, useSpread, useVolume):
 
 '''
 '''
-def gui_call(ticker, days, spreadV, volumeV):
+def gui_call(ticker, days, spreadV, volumeV, techV=1):
 	num_days = days
 	
 	useSpread = False	
 	useVolume = False
-	useAverage = False
+	useTech = True
 
 	if (spreadV == 1):
 		useSpread = True
 	if (volumeV == 1):
 		useVolume = True
+	if (techV == 0):
+		useTech = False
 	DJIA = 'djia'
 
 	if ticker.upper() == DJIA.upper():
 		tickers = cn.get_djia_list()
 		for i in range(len(tickers)):
-			process_company(tickers[i], num_days, useSpread, useVolume)
+			process_company(tickers[i], num_days, useSpread, useVolume, useTech)
 	else:	
-		process_company(ticker, num_days, useSpread, useVolume)
+		process_company(ticker, num_days, useSpread, useVolume, useTech)
 
 '''
 Main - driver of the program. Parses the command line arguments and calls precess company for given stock (based on ticker)
@@ -201,9 +203,9 @@ def main(args):
 	if ticker.upper() == DJIA.upper():
 		tickers = cn.get_djia_list()
 		for i in range(len(tickers)):
-			process_company(tickers[i], num_days, True, False)
+			process_company(tickers[i], num_days, True, False, True)
 	else:	
-		process_company(ticker, num_days, True, False)
+		process_company(ticker, num_days, True, False, True)
 
 '''
 Calls Main.
