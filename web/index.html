@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock Predictor</title>
+  <meta name="description" content="Predict a stock's next closing price with a support vector machine and technical indicators. A 2015 University of West Florida undergraduate AI project, rebuilt for the web.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f766e'/%3E%3Cpath d='M7 21l6-6 4 4 8-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8"/><path d="M7 21l6-6 4 4 8-9"/></svg>
+        Stock Predictor
+      </a>
+      <nav>
+        <a href="#how">How it works</a>
+        <a href="#about">About</a>
+        <a href="https://github.com/pdhimal1/AI-Project" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <p class="eyebrow">Undergraduate AI project · University of West Florida · 2015 → 2026</p>
+      <h1>Predict the next close with a support vector machine</h1>
+      <p class="lede">Pick a stock and a training window. A support vector regressor learns from daily prices and technical indicators (RSI, MACD, SMA, EMA), right in your browser. It then predicts the next trading day's close and shows how it would have done over the last 20 days.</p>
+    </section>
+
+    <div class="layout">
+      <form class="card controls" id="controls" autocomplete="off">
+        <label class="field-label" for="ticker">Stock ticker</label>
+        <div class="ticker-box">
+          <input id="ticker" name="ticker" type="text" value="AAPL" spellcheck="false" placeholder="e.g. AAPL, MSFT, KO" aria-autocomplete="list" aria-controls="suggest">
+          <ul id="suggest" class="suggest" role="listbox" hidden></ul>
+        </div>
+        <div class="chips" id="chips"></div>
+
+        <span class="field-label">Training window</span>
+        <div class="segmented" id="window" role="radiogroup" aria-label="Training window">
+          <button type="button" data-v="30">30d</button>
+          <button type="button" data-v="60">60d</button>
+          <button type="button" data-v="90" class="on">90d</button>
+          <button type="button" data-v="180">180d</button>
+          <button type="button" data-v="360">360d</button>
+        </div>
+
+        <span class="field-label">Features</span>
+        <label class="check"><input type="checkbox" id="useChange" checked><span><b>Price change</b><small>Day-over-day move in the close</small></span></label>
+        <label class="check"><input type="checkbox" id="useVolume"><span><b>Trading volume</b><small>Shares traded each day</small></span></label>
+        <label class="check"><input type="checkbox" id="useTech" checked><span><b>Technical indicators</b><small>SMA 20, EMA 12, RSI 14, MACD</small></span></label>
+
+        <button class="primary" type="submit" id="go">Predict price</button>
+        <p class="fine">Open, high, low and close are always included. Prices come from Yahoo Finance.</p>
+      </form>
+
+      <section class="results" aria-live="polite">
+        <div class="notice" id="notice" hidden></div>
+
+        <div class="card summary" id="summary">
+          <div class="summary-head">
+            <div>
+              <h2 id="coName">Loading…</h2>
+              <p class="muted" id="coMeta">&nbsp;</p>
+            </div>
+            <span class="badge" id="direction"></span>
+          </div>
+          <div class="kpis">
+            <div class="kpi kpi-main">
+              <span class="kpi-label" id="predLabel">Predicted close</span>
+              <span class="kpi-value" id="predValue">—</span>
+              <span class="kpi-sub" id="predSub">&nbsp;</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label" id="lastLabel">Last close</span>
+              <span class="kpi-value" id="lastValue">—</span>
+              <span class="kpi-sub" id="lastSub">&nbsp;</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label">Model</span>
+              <span class="kpi-value small" id="modelValue">—</span>
+              <span class="kpi-sub" id="modelSub">&nbsp;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Price history and predictions</h3>
+            <div class="legend">
+              <span><i class="sw sw-close"></i>Close</span>
+              <span><i class="sw sw-sma"></i>SMA 20</span>
+              <span><i class="sw sw-bt"></i>Backtest prediction</span>
+              <span><i class="sw sw-next"></i>Next-day prediction</span>
+            </div>
+          </div>
+          <div class="chart-box"><canvas id="chart" aria-label="Closing price chart with predictions"></canvas></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>How did it do? <span class="muted">Walk-forward backtest, last 20 trading days</span></h3>
+          </div>
+          <div class="stats" id="stats"></div>
+          <p class="verdict" id="verdict"></p>
+          <details class="bt-details">
+            <summary>Show day-by-day results</summary>
+            <div class="table-wrap">
+              <table id="btTable">
+                <thead><tr><th>Date</th><th>Prev close</th><th>Predicted</th><th>Actual</th><th>Error</th><th>Direction</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Technical indicators today</h3></div>
+          <div class="indicators" id="indicators"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="section" id="how">
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li><span class="n">1</span><h4>Collect</h4><p>Daily open, high, low, close and volume for the last two years, from Yahoo Finance.</p></li>
+        <li><span class="n">2</span><h4>Engineer</h4><p>Compute a 20-day SMA, a 12-day EMA, 14-day RSI and MACD (12/26) from the closing prices.</p></li>
+        <li><span class="n">3</span><h4>Scale</h4><p>Min-max scale every feature to [−1, 1] using only the training window, as in the original <code>normalize.py</code>.</p></li>
+        <li><span class="n">4</span><h4>Train</h4><p>Fit an ε-support vector regressor with an RBF kernel. Each day's features map to the next day's return.</p></li>
+        <li><span class="n">5</span><h4>Predict and check</h4><p>Predict the next trading day, skipping weekends and NYSE holidays. Then replay the last 20 days, training only on what was known each morning.</p></li>
+      </ol>
+    </section>
+
+    <section class="section about" id="about">
+      <div>
+        <h2>About the project</h2>
+        <p><strong>Stock Predictor Using Machine Learning</strong> began in 2015 as an undergraduate research project by <strong>Prakash Dhimal</strong> and <strong>Kevin Sanford</strong> in the Department of Computer Science at the University of West Florida, with faculty advisor Dr. Eman El-Sheikh.</p>
+        <p>The original was a Python desktop app built on scikit-learn's SVR and a Tkinter GUI. Over the years it gained technical indicators, autocomplete and a trading-day calendar. This page is a faithful web port: the same features and the same kind of model, running entirely in JavaScript.</p>
+        <p>The 2015 poster concluded that the model predicted the right direction about 50% of the time, <em>“the same as flipping a coin.”</em> The backtest above lets you check that conclusion against today's data. It mostly still holds, which is the real lesson: past prices alone carry very little signal about tomorrow.</p>
+        <div class="about-links">
+          <a class="button" href="assets/research-poster.pdf" target="_blank" rel="noopener">View the 2015 research poster</a>
+          <a class="button ghost" href="https://github.com/pdhimal1/AI-Project" target="_blank" rel="noopener">Source on GitHub</a>
+        </div>
+      </div>
+      <figure>
+        <img src="assets/original-app.png" alt="The original 2015 Tkinter Stock Predictor window predicting closing prices for AAPL, WMT and KO" width="737" height="366" loading="lazy">
+        <figcaption>The original desktop app, October 2015</figcaption>
+      </figure>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p><strong>Educational use only.</strong> This is not financial advice. Predictions are often wrong, and past performance does not predict future results.</p>
+      <p class="muted">© Prakash Dhimal &amp; Kevin Sanford · MIT License</p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="model.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+Data/
+Predictor/
+scripts/
+*.ipynb
+*.pdf
+*.png
+*.bat
+*.sh
+requirements.txt
+dependency.txt
+ReadMe_YF
+!web/**

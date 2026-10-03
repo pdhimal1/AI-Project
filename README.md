@@ -13,6 +13,16 @@ A user-friendly stock price prediction application powered by Machine Learning a
 - 🔍 **Smart Autocomplete** - Search stocks as you type
 - 📈 **Visual Charts** - Interactive price charts with moving averages
 
+## 🌐 Web Version
+
+A browser port of the predictor runs at **https://ai-project-tau-ten.vercel.app**. It uses the same features (OHLC, price change, volume, SMA/EMA/RSI/MACD) and an RBF-kernel SVR, written in JavaScript, plus a 20-day walk-forward backtest against a "no change" baseline.
+
+- `web/`: static site (`index.html`, `app.js`, `model.js`)
+- `api/history.js`: Vercel function that proxies daily prices from Yahoo Finance
+- `scripts/build_web_data.py`: rebuilds `web/data/` (ticker list and offline snapshots)
+
+Run it locally with `vercel dev`. Deploy with `vercel --prod`.
+
 ## 🚀 Quick Start
 
 ### Windows Users
